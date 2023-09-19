@@ -4,8 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0d499bb6-393f-4fbe-889d-c88a539b4f07" name="변경" comment="">
-      <change afterPath="$PROJECT_DIR$/doc/chatbot_prompt_template.txt" afterDir="false" />
+    <list default="true" id="0d499bb6-393f-4fbe-889d-c88a539b4f07" name="변경" comment="챗봇 생성">
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
