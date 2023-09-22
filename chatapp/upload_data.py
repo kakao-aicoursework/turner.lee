@@ -34,6 +34,14 @@ def upload_embedding_from_file(file_path, meta):
     )
     print('db success')
 
+# 매번 db 초기화
+db = Chroma(
+    persist_directory=CHROMA_PERSIST_DIR,
+    embedding_function=OpenAIEmbeddings(),
+    collection_name=CHROMA_COLLECTION_NAME,
+)
+db.delete()
+
 
 upload_embedding_from_file(os.path.join(DATA_DIR, KAKAO_SYNC_DATA_FILE_NAME), {"service": "KAKAO_SYNC"})
 upload_embedding_from_file(os.path.join(DATA_DIR, KAKAO_SOCIAL_DATA_FILE_NAME), {"service": "KAKAO_SOCIAL"})
@@ -41,12 +49,6 @@ upload_embedding_from_file(os.path.join(DATA_DIR, KAKAOTALK_CHANNEL_DATA_FILE_NA
 
 
 from pprint import pprint
-
-db = Chroma(
-    persist_directory=CHROMA_PERSIST_DIR,
-    embedding_function=OpenAIEmbeddings(),
-    collection_name=CHROMA_COLLECTION_NAME,
-)
 
 # 데이터 입력 확인
 docs = db.get(where={"service": "KAKAO_SYNC"}, limit=3)

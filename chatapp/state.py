@@ -35,6 +35,27 @@ def generate_answer(query: str):
 
     return result['answer']
 
+def gernerate_answer2(user_message) -> dict[str, str]:
+    context = dict(user_message=user_message)
+    context["input"] = context["user_message"]
+    context["intent_list"] = read_prompt_template(INTENT_LIST_TXT)
+
+    # intent = parse_intent_chain(context)["intent"]
+    intent = parse_intent_chain.run(context)
+
+    if intent == "bug":
+        answer = ""
+        for step in [bug_step1_chain, bug_step2_chain]:
+            answer += step.run(context)
+            answer += "\n\n"
+    elif intent == "enhancement":
+        answer = enhance_step1_chain.run(context)
+    else:
+        answer = default_chain.run(context)
+
+    return {"answer": answer}
+
+
 class State(rx.State):
     # The current question being asked.
     question: str
