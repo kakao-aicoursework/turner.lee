@@ -1,11 +1,11 @@
 import os
 
-from upload_data import db
+from chatapp.upload_data import db
 from langchain.chains import ConversationChain, LLMChain
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts.chat import ChatPromptTemplate
 
-DOC_DIR = os.path.dirname("../doc/")
+DOC_DIR = os.path.dirname("/Users/sumniy/Downloads/chatapp/doc/")
 INTENT_PROMPT_TEMPLATE = os.path.join(DOC_DIR, "parse_intent.txt")
 INTENT_LIST_TXT = os.path.join(DOC_DIR, "intent_list.txt")
 CHATBOT_PROMPT_TEMPLATE = os.path.join(DOC_DIR, "chatbot_prompt_template.txt")
@@ -29,11 +29,12 @@ def create_chain(llm, template_path, output_key):
     )
 
 
-llm = ChatOpenAI(temperature=0.1, max_tokens=200, model="gpt-3.5-turbo")
+intent_llm = ChatOpenAI(temperature=0.1, max_tokens=200, model="gpt-3.5-turbo")
+llm = ChatOpenAI(temperature=0.1, max_tokens=2048, model="gpt-3.5-turbo")
 
 
 parse_intent_chain = create_chain(
-    llm=llm,
+    llm=intent_llm,
     template_path=INTENT_PROMPT_TEMPLATE,
     output_key="text",
 )
@@ -55,6 +56,10 @@ kakaotalk_channel_step1_chain = create_chain(
 default_chain = ConversationChain(llm=llm, output_key="text")
 
 
+def join_search_result(docs):
+    return " ".join([doc.page_content for doc in docs])
+
+
 def generate_answer(user_message) -> dict[str, str]:
     context = dict(user_message=user_message)
     context["query"] = context["user_message"]
@@ -62,22 +67,22 @@ def generate_answer(user_message) -> dict[str, str]:
 
     # intent = parse_intent_chain(context)["intent"]
     intent = parse_intent_chain.run(context)
+    print(intent)
 
     if intent == "KAKAO_SYNC":
         result = db.similarity_search(query=user_message, where={"service": "KAKAO_SYNC"}, limit=5)
-        print(result)
-        context["base_data"] = db.similarity_search(query=user_message, where={"service": "KAKAO_SYNC"}, limit=5)
+        context["base_data"] = join_search_result(result)
         answer = kakao_sync_step1_chain.run(context)
     elif intent == "KAKAO_SOCIAL":
-        context["base_data"] = db.similarity_search(query=user_message, where={"service": "KAKAO_SOCIAL"}, limit=5)
+        result = db.similarity_search(query=user_message, where={"service": "KAKAO_SOCIAL"}, limit=5)
+        context["base_data"] = join_search_result(result)
         answer = kakao_social_step1_chain.run(context)
     elif intent == "KAKAOTALK_CHANNEL":
-        context["base_data"] = db.similarity_search(query=user_message, where={"service": "KAKAOTALK_CHANNEL"}, limit=5)
+        result = db.similarity_search(query=user_message, where={"service": "KAKAOTALK_CHANNEL"}, limit=5)
+        context["base_data"] = join_search_result(result)
         answer = kakaotalk_channel_step1_chain.run(context)
     else:
         answer = default_chain.run(context)
 
+    print(answer)
     return {"answer": answer}
-
-
-generate_answer("카카오 싱크 시작하는 법 알려줘")

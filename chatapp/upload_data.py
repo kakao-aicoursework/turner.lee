@@ -8,8 +8,8 @@ from langchain.vectorstores import Chroma
 
 os.environ["OPENAI_API_KEY"] = ""
 
-DATA_DIR = os.path.dirname("../doc/")
-CHROMA_PERSIST_DIR = os.path.dirname("../db/")
+DATA_DIR = os.path.dirname("/Users/sumniy/Downloads/chatapp/doc/")
+CHROMA_PERSIST_DIR = os.path.dirname("/Users/sumniy/Downloads/chatapp/db/")
 CHROMA_COLLECTION_NAME = "kakao-bot"
 KAKAO_SYNC_DATA_FILE_NAME = "project_data_카카오소셜.txt"
 KAKAO_SOCIAL_DATA_FILE_NAME = "project_data_카카오싱크.txt"
@@ -34,18 +34,20 @@ def upload_embedding_from_file(file_path, meta):
     )
     print('db success')
 
-# 매번 db 초기화
+
 db = Chroma(
     persist_directory=CHROMA_PERSIST_DIR,
     embedding_function=OpenAIEmbeddings(),
     collection_name=CHROMA_COLLECTION_NAME,
 )
-db.delete()
 
+# 초기화
+# db.delete(ids=db.get()['ids'])
 
-upload_embedding_from_file(os.path.join(DATA_DIR, KAKAO_SYNC_DATA_FILE_NAME), {"service": "KAKAO_SYNC"})
-upload_embedding_from_file(os.path.join(DATA_DIR, KAKAO_SOCIAL_DATA_FILE_NAME), {"service": "KAKAO_SOCIAL"})
-upload_embedding_from_file(os.path.join(DATA_DIR, KAKAOTALK_CHANNEL_DATA_FILE_NAME), {"service": "KAKAOTALK_CHANNEL"})
+# 업로드
+# upload_embedding_from_file(os.path.join(DATA_DIR, KAKAO_SYNC_DATA_FILE_NAME), {"service": "KAKAO_SYNC"})
+# upload_embedding_from_file(os.path.join(DATA_DIR, KAKAO_SOCIAL_DATA_FILE_NAME), {"service": "KAKAO_SOCIAL"})
+# upload_embedding_from_file(os.path.join(DATA_DIR, KAKAOTALK_CHANNEL_DATA_FILE_NAME), {"service": "KAKAOTALK_CHANNEL"})
 
 
 from pprint import pprint
