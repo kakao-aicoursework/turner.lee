@@ -4,11 +4,14 @@ from chatapp.upload_data import db
 from langchain.chains import ConversationChain, LLMChain
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts.chat import ChatPromptTemplate
+from langchain.tools import Tool
+from langchain.utilities import GoogleSearchAPIWrapper
 
 DOC_DIR = os.path.dirname("/Users/sumniy/Downloads/chatapp/doc/")
 INTENT_PROMPT_TEMPLATE = os.path.join(DOC_DIR, "parse_intent.txt")
 INTENT_LIST_TXT = os.path.join(DOC_DIR, "intent_list.txt")
 CHATBOT_PROMPT_TEMPLATE = os.path.join(DOC_DIR, "chatbot_prompt_template.txt")
+SEARCH_COMPRESSION_PROMPT_TEMPLATE = os.path.join(DOC_DIR, "search_compress.txt")
 
 
 def read_prompt_template(file_path: str) -> str:
@@ -31,7 +34,15 @@ def create_chain(llm, template_path, output_key):
 
 intent_llm = ChatOpenAI(temperature=0.1, max_tokens=200, model="gpt-3.5-turbo")
 llm = ChatOpenAI(temperature=0.1, max_tokens=2048, model="gpt-3.5-turbo")
-
+search = GoogleSearchAPIWrapper(
+    google_api_key=os.getenv("GOOGLE_API_KEY",""),
+    google_cse_id=os.getenv("GOOGLE_CSE_ID","")
+)
+search_tool = Tool(
+    name="Google Search",
+    description="Search Google for recent results.",
+    func=search.run,
+)
 
 parse_intent_chain = create_chain(
     llm=intent_llm,
@@ -51,6 +62,11 @@ kakao_social_step1_chain = create_chain(
 kakaotalk_channel_step1_chain = create_chain(
     llm=llm,
     template_path=CHATBOT_PROMPT_TEMPLATE,
+    output_key="text",
+)
+search_compression_chain = create_chain(
+    llm=llm,
+    template_path=SEARCH_COMPRESSION_PROMPT_TEMPLATE,
     output_key="text",
 )
 default_chain = ConversationChain(llm=llm, output_key="text")
@@ -82,7 +98,8 @@ def generate_answer(user_message) -> dict[str, str]:
         context["base_data"] = join_search_result(result)
         answer = kakaotalk_channel_step1_chain.run(context)
     else:
-        answer = default_chain.run(context)
+        context["related_web_search_results"] = search_tool.run(user_message)
+        answer = search_compression_chain.run(context)
 
     print(answer)
     return {"answer": answer}

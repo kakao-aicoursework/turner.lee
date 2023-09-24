@@ -3,3 +3,4 @@ asyncio==3.4.3
 openai==0.28.0
 chromadb
 tiktoken
+google-api-wrapper

@@ -6,8 +6,6 @@ from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.vectorstores import Chroma
 
-os.environ["OPENAI_API_KEY"] = ""
-
 DATA_DIR = os.path.dirname("/Users/sumniy/Downloads/chatapp/doc/")
 CHROMA_PERSIST_DIR = os.path.dirname("/Users/sumniy/Downloads/chatapp/db/")
 CHROMA_COLLECTION_NAME = "kakao-bot"

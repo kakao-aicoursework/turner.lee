@@ -1,4 +1,7 @@
 # chatapp.py
+import os
+os.environ["OPENAI_API_KEY"] = ""
+
 
 from chatapp.state import State
 
